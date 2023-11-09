@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+// import 'package:cached_network_image/cached_network_image.dart';
 
 class Produto {
   int? id;
@@ -427,6 +428,14 @@ class ConteudoPagina extends State {
               Text("Descrição: ${produto.descricao}"),
               Text("Preço: ${produto.preco?.toStringAsFixed(2) ?? 'N/A'}"),
               Text("Quantidade: ${produto.quantidade}"),
+              Text("Imagem: ${produto.imagem}"),
+              Image.network(
+                produto.imagem ??
+                    "https://www.globalsign.com/application/files/3916/0397/8810/iStock-833750208.png",
+                errorBuilder: (context, error, stackTrace) {
+                  return const Text("Imagem não disponível");
+                },
+              ),
             ],
           ),
           actions: [
