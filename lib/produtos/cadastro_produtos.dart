@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:convert';
+import 'package:dio/dio.dart';
+
 // import 'package:cached_network_image/cached_network_image.dart';
 
 class Produto {
@@ -420,33 +422,95 @@ class ConteudoPagina extends State {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text("Detalhes do Produto"),
-          content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("ID: ${produto.id}"),
-              Text("Nome: ${produto.nome}"),
-              Text("Descrição: ${produto.descricao}"),
-              Text("Preço: ${produto.preco?.toStringAsFixed(2) ?? 'N/A'}"),
-              Text("Quantidade: ${produto.quantidade}"),
-              Text("Imagem: ${produto.imagem}"),
-              CachedNetworkImage(
-                imageUrl: produto.imagem!, // URL da imagem
-                placeholder: (context, url) =>
-                    CircularProgressIndicator(), // Indicador de carregamento
-                errorWidget: (context, url, error) =>
-                    Icon(Icons.error), // Ícone de erro, se houver
+          content: SizedBox(
+            width: 300,
+            child: Card(
+              elevation: 5,
+              margin: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    color: Colors.pink,
+                    child: const Text(
+                      "Detalhes do Produto",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    height: 100,
+                    width: double.infinity,
+                    child: Center(
+                      child: CachedNetworkImage(
+                        imageUrl: produto.imagem!,
+                        placeholder: (context, url) =>
+                            CircularProgressIndicator(),
+                        errorWidget: (context, url, error) {
+                          if (error is DioError) {
+                            final dioError = error as DioError;
+                            final response = dioError.response;
+                            if (response != null) {
+                              print('Status Code: ${response.statusCode}');
+                              print(
+                                  'Mensagem de Erro: ${response.statusMessage}');
+                            } else {
+                              print('Erro desconhecido');
+                            }
+                          } else {
+                            print('Erro ao carregar imagem: $error');
+                          }
+
+                          return Icon(Icons.error,
+                              size: 50, color: Colors.grey);
+                        },
+                      ),
+                    ),
+                  ),
+                  ListTile(
+                    title: const Text("ID"),
+                    subtitle: Text("${produto.id}"),
+                  ),
+                  ListTile(
+                    title: const Text("Nome"),
+                    subtitle: Text("${produto.nome}"),
+                  ),
+                  ListTile(
+                    title: const Text("Descrição"),
+                    subtitle: Text("${produto.descricao}"),
+                  ),
+                  ListTile(
+                    title: const Text("Preço"),
+                    subtitle: Text(
+                      "R\$ ${produto.preco?.toStringAsFixed(2) ?? 'N/A'}",
+                    ),
+                  ),
+                  ListTile(
+                    title: const Text("Quantidade"),
+                    subtitle: Text("${produto.quantidade}"),
+                  ),
+                  Container(
+                    alignment: Alignment.centerRight,
+                    margin: const EdgeInsets.only(top: 16),
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text(
+                        "Fechar",
+                        style: TextStyle(color: Colors.pink),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text("Fechar"),
             ),
-          ],
+          ),
         );
       },
     );
