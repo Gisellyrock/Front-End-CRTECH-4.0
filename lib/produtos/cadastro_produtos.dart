@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:convert';
 import 'package:dio/dio.dart';
-
+import 'dart:io';
 // import 'package:cached_network_image/cached_network_image.dart';
 
 class Produto {
@@ -201,6 +201,28 @@ Future<void> atualizarProduto(int id, String novoNome, double novoPreco,
   }
 }
 
+Future<void> enviarImagem(String imagePath) async {
+  try {
+    // Abre o arquivo de imagem
+    File file = File(imagePath);
+
+    // Cria uma solicitação multipart
+    var request = http.MultipartRequest(
+        'POST', Uri.parse('http://localhost:8000/api/produtos/imagem'));
+
+    // Adiciona a imagem à solicitação
+    request.files.add(await http.MultipartFile.fromPath('imagem', file.path));
+
+    // Envia a solicitação
+    var response = await request.send();
+
+    print('Resposta do servidor: ${response.statusCode}');
+    print('Corpo da resposta: ${await response.stream.bytesToString()}');
+  } catch (error) {
+    print('Erro ao enviar imagem: $error');
+  }
+}
+
 class ConteudoPagina extends State {
   String? nome;
   String? descricao;
@@ -296,6 +318,7 @@ class ConteudoPagina extends State {
                         setState(() {
                           cadastrarProduto(nome, preco, descricao, imagem,
                               categoria, quantidade, context);
+                          enviarImagem(imagem!);
                         });
                       },
                       style: ElevatedButton.styleFrom(
